@@ -1,0 +1,1558 @@
+Culture を指定した文字列ソートが数字文字列も序数ソートしてくれているのでは?
+	NumericStringComparer 相当、というか。
+	自分で実装する意義はあるけれど
+
+
+
+== StringComparer クラス
+http://msdn.microsoft.com/ja-jp/library/system.stringcomparer(v=vs.110).aspx
+大文字と小文字の区別、およびカルチャ ベースまたは序数ベースの比較規則を使用する文字列比較操作を表します。
+継承階層
+System.Object 
+  System.StringComparer
+名前空間:  System
+アセンブリ:  mscorlib (mscorlib.dll 内)
+構文
+
+C#C++F#VB
+[SerializableAttribute]
+[ComVisibleAttribute(true)]
+public abstract class StringComparer : IComparer, 
+	IEqualityComparer, IComparer<string>, IEqualityComparer<string>
+
+StringComparer クラスから派生したオブジェクトでは、大文字と小文字の区別および特定のカルチャ固有の比較規則を考慮して、文字列ベースの比較操作、値の比較操作、およびハッシュ コード操作を実行できます。 StringComparer クラスを使用して、型固有の比較機能を作成し、ジェネリック コレクションで要素をソートできます。 Hashtable 、Dictionary<TKey, TValue>、SortedList、SortedList<TKey, TValue> などのクラスでは、StringComparer クラスを使用してソートします。
+StringComparer クラスで表す比較操作には、大文字と小文字を区別するかどうか、単語ベース (カルチャに依存) と序数ベース (カルチャに依存しない) のどちらの比較規則を使用するかを定義できます。 単語ベースおよび序数ベースの比較規則の詳細については、System.Globalization.CompareOptions のトピックを参照してください。
+実装するプロパティ
+外観上の矛盾により、StringComparer クラスのプロパティの使用方法がわかりにくい場合があります。 StringComparer クラスは、abstract (Visual Basic の場合は MustInherit) として宣言されます。そのため、このクラスのメンバーは、StringComparer クラスから派生したクラスのオブジェクトだけに対して呼び出すことができます。 対照的に、StringComparer クラスの各プロパティは、static (Visual Basic の場合は Shared) として宣言されます。そのため、先に派生クラスを作成しなくてもプロパティを呼び出すことができます。
+実際には、各プロパティからは、StringComparer クラスから派生した匿名クラスのインスタンスが返るため、StringComparer プロパティを直接呼び出すことができます。 そのため、各プロパティ値の型は、StringComparer になります。この型は、匿名クラス自体の型ではなく、匿名クラスの基本クラスです。 各 StringComparer クラス プロパティは、大文字と小文字の区別や比較に関する定義済みの規則をサポートする StringComparer オブジェクトを返します。
+
+
+
+== CompareOptions 列挙体
+http://msdn.microsoft.com/ja-jp/library/system.globalization.compareoptions(v=vs.110).aspx
+
+CompareInfo と共に使用する文字列比較オプションを定義します。
+この列挙体には、メンバー値のビットごとの組み合わせを可能にする FlagsAttribute 属性が含まれています。
+名前空間:  System.Globalization
+アセンブリ:  mscorlib (mscorlib.dll 内)
+構文
+
+C#C++F#VB
+[SerializableAttribute]
+[ComVisibleAttribute(true)]
+[FlagsAttribute]
+public enum CompareOptions
+メンバー
+
+メンバー名	説明
+	IgnoreCase	文字列比較で大文字と小文字の区別を無視することを示します。
+	IgnoreKanaType	文字列比較でカナ型を無視することを示します。 カナ型とは、日本語の発音を表すひらがなとカタカナの文字を指します。 ひらがなは、本来の日本語の表現と単語に使用し、カタカナは "コンピューター" または "インターネット" などの外来語に使用します。 発音は、ひらがなとカタカナのどちらでも表現できます。 この値が選択されている場合、ある発音を示すひらがなは、同じ発音を示すカタカナと同一であると見なされます。
+	IgnoreNonSpace	文字列比較で、発音区別符など、非スペーシング組み合わせ文字を無視するように指定します。 Unicode 標準は、新しい文字を生成するために基本文字と組み合わせられる文字を組み合わせ文字として定義しています。 非スペーシング組み合わせ文字は、表示されるときに文字間隔用の領域は確保しません。
+	IgnoreSymbols	文字列比較において、空白文字、句読点、通貨記号、パーセント記号、算術記号、アンパサンドなどの記号を無視することを示します。
+	IgnoreWidth	文字列比較において、半角と全角の区別を無視することを示します。 たとえば、日本語のカタカナ文字は、全角または半角で記述できます。 この値を選択した場合、全角で記述されたカタカナ文字は、半角で記述されたカタカナ文字と同一であると見なされます。
+	None	文字列比較の既定のオプション設定を示します。
+	Ordinal	Unicode UTF-16 でエンコードされた連続する文字列の値 (コード単位比較に基づくコード単位) を使用して、文字列を比較することを示します。この比較は高速ですが、カルチャに応じた処理は行いません。 XXXX16 が YYYY16 よりも小さい場合、XXXX16 というコード単位で始まる文字列は YYYY16 で始まる文字列よりも前になります。 この値を他の CompareOptions 値と組み合わせることはできません。この値は単独で使用してください。
+	OrdinalIgnoreCase	文字列の比較で大文字と小文字の違いを無視し、通常の比較を実行する必要があります。 この手法は、インバリアント カルチャを使用して文字列を大文字に変換し、その結果に対して序数に基づく比較を実行することと同じです。
+	StringSort	文字列の比較時に、文字列での並べ替えアルゴリズムを使用することを示します。 文字列での並べ替えでは、ハイフン、アポストロフィ、およびその他の英数字以外の記号が英数字よりも前に来ます。
+解説
+
+これらのオプションは、大文字と小文字を区別するかどうか、または文字の型を無視するかどうかを示します。
+.NET Framework は、単語での並べ替え、文字列での並べ替え、序数での並べ替えの異なる 3 種類の並べ替えの方法を使用します。 単語での並べ替えでは、カルチャを考慮した文字列比較が実行されます。 英数字以外の特定の文字に特別な重みが割り当てられる場合があります。 たとえば、ハイフン ("-") に割り当てられる重みは非常に小さいため、並べ替えられたリスト内の "coop" と "co-op" の出現位置は隣接します。 文字列での並べ替えは、単語での並べ替えに似ていますが、例外的な処理は行われません。 このため、英数字以外のすべての記号がどの英数字よりも前に来ます。 序数での並べ替えでは、文字列の各要素の Unicode 値を元に文字列が比較されます。
+StringSort 値は、CompareInfo.Compare および CompareInfo.GetSortKey とのみ使用できます。 StringSort 値を、CompareInfo.IsPrefix、CompareInfo.IsSuffix、CompareInfo.IndexOf、または CompareInfo.LastIndexOf で使用した場合、ArgumentException がスローされます。
+
+----
+using System;
+using System.Collections;
+using System.Globalization;
+
+
+public class SamplesCompareOptions  {
+
+   private class MyStringComparer: IComparer {
+      private CompareInfo myComp;   
+      private CompareOptions myOptions = CompareOptions.None;
+
+      // Constructs a comparer using the specified CompareOptions.
+      public MyStringComparer( CompareInfo cmpi, CompareOptions options )  {
+         myComp = cmpi;
+         this.myOptions = options;
+      }
+
+      // Compares strings with the CompareOptions specified in the constructor.
+      public int Compare(Object a, Object b) {
+         if (a == b) return 0;
+         if (a == null) return -1;
+         if (b == null) return 1;
+
+         String sa = a as String;
+         String sb = b as String;
+         if (sa != null && sb != null)
+            return myComp.Compare(sa, sb, myOptions);
+         throw new ArgumentException("a and b should be strings.");
+
+      }
+   }
+
+   public static void Main()  {
+
+      // Creates and initializes an array of strings to sort.
+      String[] myArr = new String[9] { "cant", "bill's", "coop", "cannot", "billet", "can't", "con", "bills", "co-op" };
+      Console.WriteLine( "\nInitially," );
+      foreach ( String myStr in myArr )
+         Console.WriteLine( myStr );
+
+      // Creates and initializes a Comparer to use.
+      //CultureInfo myCI = new CultureInfo( "en-US", false );
+      MyStringComparer myComp = new MyStringComparer(CompareInfo.GetCompareInfo("en-US"), CompareOptions.None);
+
+      // Sorts the array without StringSort.
+      Array.Sort( myArr, myComp );
+      Console.WriteLine( "\nAfter sorting without CompareOptions.StringSort:" );
+      foreach ( String myStr in myArr )
+         Console.WriteLine( myStr );
+
+      // Sorts the array with StringSort.
+      myComp = new MyStringComparer(CompareInfo.GetCompareInfo("en-US"), CompareOptions.StringSort);
+      Array.Sort( myArr, myComp );
+      Console.WriteLine( "\nAfter sorting with CompareOptions.StringSort:" );
+      foreach ( String myStr in myArr )
+         Console.WriteLine( myStr );
+
+   }
+
+}
+----
+
+
+= エクスプローラのファイル順のように、自然順ソートで並び替える - DoboWiki
+[2015-06-01 00:09:37]
+http://wiki.dobon.net/index.php?.NET%A5%D7%A5%ED%A5%B0%A5%E9%A5%DF%A5%F3%A5%B0%B8%A6%B5%E6%2F111
+エクスプローラのファイル順のように、自然順ソートで並び替える - DoboWiki
+
+エクスプローラのファイル順のように、自然順ソートで並び替える †
+例えば、文字列の配列
+
+img2.jpg
+img1.jpg
+img10.jpg
+があった時、これを通常の方法(「配列やコレクション内の要素を並び替える」で紹介しているような方法)で並び替えると、
+
+img1.jpg
+img10.jpg
+img2.jpg
+という順番になります。しかしエクスプローラでこのような名前のファイルを並び替えると、
+
+img1.jpg
+img2.jpg
+img10.jpg
+のようになります。ファイルの並び方としては、この方がずっと分かりやすいです。
+
+ここでは、このように自然順ソート(Natural Sort)で文字列の配列を並び替える方法を紹介します。
+
+なお配列を並び替える方法についてはほとんど説明しませんので、分からない場合は、まず「配列やコレクション内の要素を並び替える」をご覧ください。
+
+また、ここで紹介しているコードは、作成とテストに十分な時間をかけることができていないことをご了承ください。
+
+↑↓
+StrCmpLogicalWを使用する方法 †
+
+StrCmpLogicalW functionを使うと、エクスプローラと同じ並び順の並び替えができるようになるようです。
+
+StrCmpLogicalWは、Windows XP以上で使用できます。また、WindowsのバージョンによってStrCmpLogicalWの結果が異なる可能性があります。
+
+さらに「sorting - Natural Sort Order in C# - Stack Overflow」にある書き込みによると、StrCmpLogicalWは推移的ではない(つまり、例えば文字列 a, b, c があって、a < b、 b < c なのに、a > c になることがある)ため、これを使って並べ替えを行うと無限ループになることがあるということです。
+
+StrCmpLogicalWを使用して文字列を比較する、IComparerを実装したクラスの例を以下に示します。
+
+using System;
+ 
+/// <summary>
+/// 大文字小文字を区別せずに、
+/// 文字列内に含まれている数字を考慮して文字列を比較します。
+/// </summary>
+public class LogicalStringComparer :
+    System.Collections.IComparer,
+    System.Collections.Generic.IComparer<string>
+{
+    [System.Runtime.InteropServices.DllImport("shlwapi.dll",
+        CharSet = System.Runtime.InteropServices.CharSet.Unicode,
+        ExactSpelling = true)]
+    private static extern int StrCmpLogicalW(string x, string y);
+ 
+    public int Compare(string x, string y)
+    {
+        return StrCmpLogicalW(x, y);
+    }
+ 
+    public int Compare(object x, object y)
+    {
+        return this.Compare(x.ToString(), y.ToString());
+    }
+}
+これを使って実際に並び替えを行う例を以下に示します。
+
+'並び替える文字列の配列
+Dim files As String() = New String() {"img2.jpg", "img1.jpg", "img10.jpg"}
+ 
+'自然順ソートで並び替える
+Array.Sort(files, New LogicalStringComparer())
+ 
+'並び替えた結果を表示する
+Console.WriteLine(String.Join(", ", files))
+'img1.jpg, img2.jpg, img10.jpg
+//並び替える文字列の配列
+string[] files = new string[] { "img2.jpg", "img1.jpg", "img10.jpg" };
+ 
+//自然順ソートで並び替える
+Array.Sort(files, new LogicalStringComparer());
+ 
+//並び替えた結果を表示する
+Console.WriteLine(string.Join(", ", files));
+//img1.jpg, img2.jpg, img10.jpg
+LINQを使って並び替える例は、以下のようになります。
+
+'並び替える文字列の配列
+Dim files As String() = New String() {"img2.jpg", "img1.jpg", "img10.jpg"}
+ 
+'自然順ソートで並び替えられた配列を取得する
+Dim sortedArray As String() = _
+    files.OrderBy(Function(f) f, New LogicalStringComparer()).ToArray()
+//並び替える文字列の配列
+string[] files = new string[] { "img2.jpg", "img1.jpg", "img10.jpg" };
+ 
+//自然順ソートで並び替えられた配列を取得する
+string[] sortedArray =
+    files.OrderBy(f => f, new LogicalStringComparer()).ToArray();
+このクラスを使って次のような配列を並べ替えた時、
+
+a 2.txt
+a01.txt
+a02.txt
+a1 0.txt
+a1.txt
+a10.txt
+a100.txt
+a11.txt
+a2.txt
+a29b.txt
+a2b.txt
+a3.txt
+以下のような順番になりました(Windows 8)。
+
+a 2.txt
+a01.txt
+a1 0.txt
+a1.txt
+a02.txt
+a2.txt
+a2b.txt
+a3.txt
+a10.txt
+a11.txt
+a29b.txt
+a100.txt
+↑↓
+自分で何とかしてみる †
+
+次に、自分でなんとかする方法を考えてみます。
+
+自然順ソートというものに定義があるのかと思って調べてみたのですが見つからなかったので、自分なりに勝手に考えてみます。
+
+通常の文字列比較は、先頭から1文字ずつ文字を比較していき、違いが見つかったところでその文字の大小を文字列全体の大小とするというようなやり方ではないでしょうか。
+
+これに対して自然順ソートの文字列比較では、文字列内の数字の部分を数値として比較しなければなりません。つまり、文字列の中で数字が連続する部分(以下、数字部分)と、数字以外の文字(以下、非数字)が連続する部分(以下、非数字部分)を分けて、数字部分は数値に変換して数値で比較し、非数字部分は通常の文字列比較と同じように比較します。
+
+他にも、半角数字と全角数字の扱い、スペース文字の扱い、先頭に"0"がある数字の扱いなど、細かい取り決めが必要ですが、それはケースバイケースで考えることにします。
+
+↑↓
+正規表現を使用して文字列を分割する方法 †
+
+まずは、文字列を数字部分と非数字部分に分割する方法を考えてみます。
+
+Regex.Splitメソッドを使えば、それが可能です。正規表現パターンに"(\d+)"のようなものを使えば、{(非数字部分), (数字部分), (非数字部分), ...}のように、非数字部分と数字部分が交互に現れる配列として分割した結果を取得できます。
+
+このようにして取得した配列を先頭から順番に比較していき、違いがあればその結果を返し、同じならば次の部分を比較します。この時、非数字部分であれば文字列として比較しますが、数字部分であればこれを数値に変換して比較します。
+
+このような方法で2つの文字列を比較するIComparerの例を以下に示します。
+
+この例では、文字列を分割する正規表現パターンを"\s*([0-9]+)\s*"のようにしました。"[0-9]"としているのは、"\d"を使うと全角数字なども対象になってしまい、数値に変換するのが大変になるからです。"\s*"をつけているのは、数字の前後のスペース文字を無視するためです。(もし無視したくないのであれば、これを削除してください。)
+
+また、"1"と"01"のように、数字が違っても数値が違う場合は、数字部分の長さの比較結果を覚えておいて、もし最後まで違いがなかった時に、その結果を返すようにしています。それも同じだった場合は、文字列の長さを比較しています。
+
+using System;
+using System.Text.RegularExpressions;
+ 
+/// <summary>
+/// 文字列内に含まれている半角数字を考慮して文字列を比較します。
+/// </summary>
+public class NaturalStringComparer :
+    System.Collections.IComparer,
+    System.Collections.Generic.IComparer<string>
+{
+    private StringComparison comparisonType;
+ 
+    /// <summary>
+    /// NaturalStringComparerのコンストラクタ。
+    /// </summary>
+    /// <param name="compType">
+    /// 文字列を比較する方法を表すStringComparison。
+    /// </param>
+    public NaturalStringComparer(StringComparison compType)
+    {
+        this.comparisonType = compType;
+    }
+    /// <summary>
+    /// NaturalStringComparerのコンストラクタ。
+    /// </summary>
+    public NaturalStringComparer()
+        : this(StringComparison.CurrentCulture)
+    {
+    }
+ 
+    public int Compare(string x, string y)
+    {
+        if (x == null)
+        {
+            if (y == null)
+            {
+                return 0;
+            }
+            return -1;
+        }
+        if (y == null)
+        {
+            return 1;
+        }
+ 
+        //数字部分で文字列を分割する
+        //数字の前後のスペースは省略する
+        Regex splitReg = new Regex(@"\s*([0-9]+)\s*");
+        string[] aryX = splitReg.Split(x);
+        string[] aryY = splitReg.Split(y);
+ 
+        int minLen = Math.Min(aryX.Length, aryY.Length);
+        int firstComp = 0;
+ 
+        for (int i = 0; i < minLen; i++)
+        {
+            //非数字部分を取得
+            string strX = aryX[i];
+            string strY = aryY[i];
+            //非数字部分が違う時は、その結果を返す
+            int strComp = string.Compare(strX, strY, this.comparisonType);
+            if (strComp != 0)
+            {
+                return strComp;
+            }
+ 
+            //数字部分を取得
+            i++;
+            if (minLen <= i)
+            {
+                break;
+            }
+            strX = aryX[i];
+            strY = aryY[i];
+            //数字を数値に変換
+            double numX;
+            double numY;
+            if (double.TryParse(strX, out numX) &&
+                double.TryParse(strY, out numY))
+            {
+                //数値が違う時は、その結果を返す
+                if (numX != numY)
+                {
+                    return numX.CompareTo(numY);
+                }
+                //同じ数値の場合は、どちらの文字列が長いか覚えておく
+                if (firstComp == 0)
+                {
+                    firstComp = strX.Length - strY.Length;
+                }
+            }
+            else
+            {
+                //数値に変換できなかった時は、文字列として比較する
+                return string.Compare(strX, strY, this.comparisonType);
+            }
+        }
+ 
+        //すべての部分が同じと判断された時
+        //数字部分の文字列に違いがあった時は、その結果を返す
+        if (firstComp != 0)
+        {
+            return firstComp;
+        }
+ 
+        //最後まで同じだった時は、文字列の長さを比較する
+        return x.Length - y.Length;
+    }
+ 
+    public int Compare(object x, object y)
+    {
+        return this.Compare(x.ToString(), y.ToString());
+    }
+}
+このクラスを使って次の配列を並び替えると、
+
+a 2.txt
+a01.txt
+a02.txt
+a1 0.txt
+a1.txt
+a10.txt
+a100.txt
+a11.txt
+a2.txt
+a29b.txt
+a2b.txt
+a3.txt
+以下のような順番になりました。
+
+a1 0.txt
+a1.txt
+a01.txt
+a2.txt
+a 2.txt
+a02.txt
+a2b.txt
+a3.txt
+a10.txt
+a29b.txt
+a100.txt
+a11.txt
+この方法は正規表現を使用しているため、きっと遅いです。「Natural Sort Comparer - CodeProject」で紹介されている方法はこれとほぼ同じやり方みたいですが、文字列を分割した結果をDictionaryのテーブルとして保存しているため、その点改善されています。
+
+↑↓
+先頭から1文字ずつ比較していく方法 †
+
+もっと単純に、文字列の先頭から1文字ずつ比較していく方法を考えてみます。
+
+1文字ずつ比較していき、違いが見つかったとします。もし違いのあった文字が両方とも非数字だったら、普通に文字の比較結果を返します。両方とも数字だったら、その数字が含まれている数字部分を数値に変換して、数値としての比較結果を返します。片方だけが数字だった場合は、その前の文字が数字であるかを調べ、数字であればその数字部分を数値に変換して比較し、数字でなければ単純に文字を比較した結果を返します。
+
+このようにして文字列を比較するIComparerの例を以下に示します。この例では、半角数字と全角数字を区別せずに、どちらも同じ数値になるようにしています。全角数字を非数字として扱うならば、もっと簡単にできると思います。
+
+using System;
+ 
+/// <summary>
+/// 文字列内に含まれている半角、全角数字を考慮して文字列を比較します。
+/// </summary>
+public class StringNaturalComparer :
+    System.Collections.IComparer,
+    System.Collections.Generic.IComparer<string>
+{
+    public int Compare(string x, string y)
+    {
+        if (x == null)
+        {
+            if (y == null)
+            {
+                return 0;
+            }
+            return -1;
+        }
+        if (y == null)
+        {
+            return 1;
+        }
+ 
+        int xLen = x.Length;
+        int yLen = y.Length;
+        int xIndex = 0;
+        int yIndex = 0;
+        int firstResult = 0;
+ 
+        //1文字ずつ調べる
+        while ((xIndex < xLen) && (yIndex < yLen))
+        {
+            char xChar = x[xIndex];
+            char yChar = y[yIndex];
+ 
+            if (xChar != yChar)
+            {
+                //違う文字が見つかった時
+                //その文字が数字か調べる
+                bool xDigit = IsDigit(xChar);
+                bool yDigit = IsDigit(yChar);
+ 
+                //片方だけが数字で、一つ前の文字が数字の時
+                if (xDigit && !yDigit &&
+                    (0 < yIndex) && IsDigit(y[yIndex - 1]))
+                {
+                    //非数字の方を一つ前に戻す
+                    yIndex--;
+                    yChar = y[yIndex];
+                    yDigit = true;
+                }
+                else if (!xDigit && yDigit &&
+                    (0 < xIndex) && IsDigit(x[xIndex - 1]))
+                {
+                    xIndex--;
+                    xChar = x[xIndex];
+                    xDigit = true;
+                }
+ 
+                if (xDigit && yDigit)
+                {
+                    //両方とも数字の時
+                    //数字部分を数値に変換して比較する
+                    double xNum = ConvertStringToNumber(x, ref xIndex);
+                    double yNum = ConvertStringToNumber(y, ref yIndex);
+                    //数値が違ったら、その結果を返す
+                    if (xNum != yNum)
+                    {
+                        return xNum.CompareTo(yNum);
+                    }
+                    //数値が同じだったら、文字を比較した結果を覚えておく
+                    if (firstResult == 0)
+                    {
+                        firstResult = xChar.CompareTo(yChar);
+                    }
+                }
+                else
+                {
+                    //両方とも非数字か、片方が数字で前の文字が非数字の時
+                    //文字を比較した結果を返す
+                    return xChar.CompareTo(yChar);
+                }
+            }
+ 
+            //次の文字へ
+            xIndex++;
+            yIndex++;
+        }
+ 
+        //最後まで違いがなかった時
+        //数字部分に違いがあったら、その結果を返す
+        if (firstResult != 0)
+        {
+            return firstResult;
+        }
+ 
+        //最後は文字列の長さを比較する
+        return xLen - yLen;
+    }
+ 
+    public int Compare(object x, object y)
+    {
+        return this.Compare(x.ToString(), y.ToString());
+    }
+ 
+    /// <summary>
+    /// 指定されたインデックスの前後で数字が連続する部分を数値に変換
+    /// </summary>
+    /// <param name="s">対象とする文字列</param>
+    /// <param name="index">変換する数字部分のインデックス。
+    /// 呼び出し後は数字部分の最後のインデックスが格納される。</param>
+    /// <returns>該当する数字部分が変換された数値。</returns>
+    private static double ConvertStringToNumber(string s, ref int index)
+    {
+        double sum = 0.0;
+ 
+        //indexの前の数字部分を数値に変換
+        double e = 1.0;
+        for (int i = index - 1; 0 <= i; i--)
+        {
+            //数字の文字を数値に変換して、前に結果に加算
+            int num = ConvertCharToInt32(s[i]);
+            if (num < 0)
+            {
+                break;
+            }
+            sum += num * e;
+            e *= 10.0;
+        }
+ 
+        //indexから後の数字部分を数値に変換
+        for (; index < s.Length; index++)
+        {
+            int num = ConvertCharToInt32(s[index]);
+            if (num < 0)
+            {
+                break;
+            }
+            sum = sum * 10.0 + num;
+        }
+ 
+        index--;
+        return sum;
+    }
+ 
+    /// <summary>
+    /// 数字を数値に変換する
+    /// </summary>
+    /// <param name="c">変換する文字</param>
+    /// <returns>半角、全角数字の時は、数値。それ以外は-1。</returns>
+    private static int ConvertCharToInt32(char c)
+    {
+        if ('0' <= c && c <= '9')
+        {
+            return (int)c - (int)'0';
+        }
+        else if ('0' <= c && c <= '9')
+        {
+            return (int)c - (int)'0';
+        }
+        return -1;
+    }
+ 
+    /// <summary>
+    /// 文字が数字が調べる
+    /// </summary>
+    /// <param name="c">調べる文字</param>
+    /// <returns>文字が半角、全角数字ならTrue。それ以外はFalse。</returns>
+    private static bool IsDigit(char c)
+    {
+        return ('0' <= c && c <= '9') || ('0' <= c && c <= '9');
+    }
+}
+このクラスを使って次の配列を並べ替えると、
+
+a 2.txt
+a01.txt
+a02.txt
+a1 0.txt
+a1.txt
+a10.txt
+a100.txt
+a11.txt
+a2.txt
+a29b.txt
+a2b.txt
+a3.txt
+以下のような順番になりました。
+
+a 2.txt
+a1 0.txt
+a01.txt
+a1.txt
+a02.txt
+a2.txt
+a2b.txt
+a3.txt
+a10.txt
+a11.txt
+a29b.txt
+a100.txt
+↑↓
+Natural Order String Comparison を参考にする †
+
+「Natural Order String Comparison」に、Martin Poolさんが作成した自然順文字列比較を行うC言語のコードがあります。これは、PHPのstrnatcmpやstrnatcasecmp関数の基になっているそうです。
+
+これをC#とVB.NETで書いてみたものを以下に紹介します。
+
+using System;
+ 
+/*
+strnatcmp.cs
+Copyright (C) 2013 by DOBON! <http://dobon.net>
+ 
+Based on
+strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
+Copyright (C) 2000, 2004 by Martin Pool <mbp sourcefrog net>
+ 
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+ 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+ 
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+ 
+/// <summary>
+/// 自然順アルゴリズムにより文字列比較を行います。
+/// </summary>
+public class StrNatComparer :
+    System.Collections.IComparer,
+    System.Collections.Generic.IComparer<string>
+{
+    private bool ignoreCase = false;
+ 
+    /// <summary>
+    /// StrNatComparerのコンストラクタ。
+    /// </summary>
+    /// <param name="ignoreCaseComparer">
+    /// 大文字小文字を区別しない文字列比較を行います
+    /// </param>
+    public StrNatComparer(bool ignoreCaseComparer)
+    {
+        this.ignoreCase = ignoreCaseComparer;
+    }
+    public StrNatComparer()
+        : this(false)
+    {
+    }
+ 
+    public int Compare(string a, string b)
+    {
+        return StrNatCmp0(a, b, this.ignoreCase);
+    }
+ 
+    public int Compare(object a, object b)
+    {
+        return this.Compare(a.ToString(), b.ToString());
+    }
+ 
+    /// <summary>
+    /// 指定した文字列内の指定したインデックスの文字を返します。
+    /// </summary>
+    /// <param name="s">対象とする文字列。</param>
+    /// <param name="index">取得したい文字があるインデックス。</param>
+    /// <returns>指定したインデックスに文字があれば、その文字。
+    /// なければ、'\0'。</returns>
+    private static char GetChar(string s, int index)
+    {
+        if ((index < 0) || (s.Length <= index))
+        {
+            return '\0';
+        }
+        return s[index];
+    }
+ 
+    /* These are defined as macros to make it easier to adapt this code to
+       different characters types or comparison functions. */
+    private static bool IsDigit(char c)
+    {
+        return ('0' <= c) && (c <= '9');
+    }
+ 
+    private static bool IsSpace(char c)
+    {
+        return char.IsWhiteSpace(c);
+    }
+ 
+    private static char ToUpper(char c)
+    {
+        return char.ToUpper(c,
+            System.Globalization.CultureInfo.InvariantCulture);
+    }
+ 
+    private static int CompareRight(string a, string b, int ai, int bi)
+    {
+        int bias = 0;
+ 
+        /* The longest run of digits wins.  That aside, the greatest
+        value wins, but we can't know that it will until we've scanned
+        both numbers to know that they have the same magnitude, so we
+        remember it in BIAS. */
+        for (; ; ai++, bi++)
+        {
+            char ca = GetChar(a, ai);
+            char cb = GetChar(b, bi);
+ 
+            if (!IsDigit(ca) && !IsDigit(cb))
+            {
+                return bias;
+            }
+            else if (!IsDigit(ca))
+            {
+                return -1;
+            }
+            else if (!IsDigit(cb))
+            {
+                return 1;
+            }
+            else if (ca < cb)
+            {
+                if (bias != 0)
+                {
+                    bias = -1;
+                }
+            }
+            else if (ca > cb)
+            {
+                if (bias != 0)
+                {
+                    bias = 1;
+                }
+            }
+            else if (ca == '\0' && cb == '\0')
+            {
+                return bias;
+            }
+        }
+    }
+ 
+    private static int CompareLeft(string a, string b, int ai, int bi)
+    {
+        /* Compare two left-aligned numbers: the first to have a
+           different value wins. */
+        for (; ; ai++, bi++)
+        {
+            char ca = GetChar(a, ai);
+            char cb = GetChar(b, bi);
+ 
+            if (!IsDigit(ca) && !IsDigit(cb))
+            {
+                return 0;
+            }
+            else if (!IsDigit(ca))
+            {
+                return -1;
+            }
+            else if (!IsDigit(cb))
+            {
+                return 1;
+            }
+            else if (ca < cb)
+            {
+                return -1;
+            }
+            else if (ca > cb)
+            {
+                return 1;
+            }
+        }
+    }
+ 
+    private static int StrNatCmp0(string a, string b, bool foldCase)
+    {
+        if (a == null)
+        {
+            if (b == null)
+            {
+                return 0;
+            }
+            return -1;
+        }
+        if (b == null)
+        {
+            return 1;
+        }
+ 
+        int ai = 0;
+        int bi = 0;
+ 
+        while (true)
+        {
+            char ca = GetChar(a, ai);
+            char cb = GetChar(b, bi);
+ 
+            /* skip over leading spaces or zeros */
+            while (char.IsWhiteSpace(ca))
+            {
+                ai++;
+                ca = GetChar(a, ai);
+            }
+ 
+            while (char.IsWhiteSpace(cb))
+            {
+                bi++;
+                cb = GetChar(b, bi);
+            }
+ 
+            /* process run of digits */
+            if (IsDigit(ca) && IsDigit(cb))
+            {
+                bool fractional = (ca == '0' || cb == '0');
+                if (fractional)
+                {
+                    int result = CompareLeft(a, b, ai, bi);
+                    if (result != 0)
+                    {
+                        return result;
+                    }
+                }
+                else
+                {
+                    int result = CompareRight(a, b, ai, bi);
+                    if (result != 0)
+                    {
+                        return result;
+                    }
+                }
+            }
+ 
+            if (ca == '\0' && cb == '\0')
+            {
+                /* The strings compare the same.  Perhaps the caller
+                       will want to call strcmp to break the tie. */
+                return 0;
+            }
+ 
+            if (foldCase)
+            {
+                ca = char.ToUpper(ca);
+                cb = char.ToUpper(cb);
+            }
+ 
+            if (ca < cb)
+            {
+                return -1;
+            }
+            else if (ca > cb)
+            {
+                return 1;
+            }
+ 
+            ai++;
+            bi++;
+        }
+    }
+ 
+    public int StrNatCmp(string a, string b)
+    {
+        return StrNatCmp0(a, b, false);
+    }
+ 
+    /* Compare, recognizing numeric string and ignoring case. */
+    public int StrNatCaseCmp(string a, string b)
+    {
+        return StrNatCmp0(a, b, true);
+    }
+}
+このクラスを使って次の配列を並べ替えると、
+
+a 2.txt
+a01.txt
+a02.txt
+a1 0.txt
+a1.txt
+a10.txt
+a100.txt
+a11.txt
+a2.txt
+a29b.txt
+a2b.txt
+a3.txt
+以下のような順番になりました。
+
+a01.txt
+a02.txt
+a1.txt
+a1 0.txt
+a2.txt
+a 2.txt
+a2b.txt
+a3.txt
+a10.txt
+a29b.txt
+a100.txt
+a11.txt
+↑↓
+その他の参考になるページ †
+
+最後に、上記で紹介した以外の、参考になりそうなページを紹介します。
+
+The Alphanum Algorithm
+Natural Sorting in C#
+Numeric String Sort in C# - CodeProject
+Implementing the .NET IComparer interface to get a more natural sort order - CodeProject
+tgmayfield: String natural sorting
+
+= sorting - Natural Sort Order in C# - Stack Overflow
+[2015-06-01 00:10:50]
+http://stackoverflow.com/questions/248603/natural-sort-order-in-c-sharp
+sorting - Natural Sort Order in C# - Stack Overflow
+
+Natural Sort Order in C#
+
+up vote
+down vote
+favorite
+Anyone have a good resource or provide a sample of a natural order sort in C# for an FileInfo array? I am implementing the IComparer interface in my sorts.
+
+c# sorting file natural-sort
+shareimprove this question
+edited Oct 28 '09 at 15:56
+
+asked Oct 29 '08 at 22:04
+
+Michael Kniskern
+8,14145109183
+add a comment
+11 Answers
+activeoldestvotes
+up vote
+84
+down vote
+accepted
+The easiest thing to do is just P/Invoke the built-in function in Windows, and use it as the comparison function in your IComparer:
+
+[DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+private static extern int StrCmpLogicalW(string psz1, string psz2);
+Michael Kaplan has some examples of how this function works here, and the changes that were made for Vista to make it work more intuitively. The plus side of this function is that it will have the same behaviour as the version of Windows it runs on, however this does mean that it differs between versions of Windows so you need to consider whether this is a problem for you.
+
+So a complete implementation would be something like:
+
+[SuppressUnmanagedCodeSecurity]
+internal static class SafeNativeMethods
+{
+    [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+    public static extern int StrCmpLogicalW(string psz1, string psz2);
+}
+
+public sealed class NaturalStringComparer : IComparer<string>
+{
+    public int Compare(string a, string b)
+    {
+        return SafeNativeMethods.StrCmpLogicalW(a, b);
+    }
+}
+
+public sealed class NaturalFileInfoNameComparer : IComparer<FileInfo>
+{
+    public int Compare(FileInfo a, FileInfo b)
+    {
+        return SafeNativeMethods.StrCmpLogicalW(a.Name, b.Name);
+    }
+}
+shareimprove this answer
+edited Oct 7 '14 at 21:17
+
+Community♦
+1	
+answered Oct 29 '08 at 22:09
+
+Greg Beech
+63.1k21149204
+4	 	
+Great answer. Caveat: This won't work with Win2000, for those few folks still running things on that operating system. On the other hand, there's enough hints between Kaplan's blog and the MSDN documentation to create a similar function. –  Chris Charabaruk Oct 29 '08 at 22:30
+1	 	
+This is not portable, only works in Win32, but does not work in Linux / MacOS / Silverlight / Windows Phone / Metro –  linquize Jul 29 '12 at 9:36
+8	 	
+@linquize - He said .NET not Mono, so Linux/OSX isn't really a concern. Windows Phone/Metro didn't exist in 2008 when this answer was posted. And how often do you do file operations in Silverlight? So for the OP, and probably most other people, it was a suitable answer. In any case, you're free to provide a better answer; that's how this site works. –  Greg Beech Jul 30 '12 at 7:45
+9	 	
+@linquize - You expect me to periodically go back over all my answers for the last four years to ensure they reflect the most up to date information available...? As I said, this answer was perfectly reasonable four years ago, as can clearly be seen by the fact that the OP marked it as accepted. –  Greg Beech Jul 30 '12 at 12:15 
+2	 	
+This does not mean that the original answer was wrong. I just add additional info with up-to-date info –  linquize Jul 30 '12 at 15:10
+show 1 more comment
+up vote
+18
+down vote
+Just thought I'd add to this (with the most concise solution I could find):
+
+    public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> source, Func<T, string> selector)
+    {
+        int max = source
+            .SelectMany(i => Regex.Matches(selector(i), @"\d+").Cast<Match>().Select(m => (int?)m.Value.Length))
+            .Max() ?? 0;
+
+        return source.OrderBy(i => Regex.Replace(selector(i), @"\d+", m => m.Value.PadLeft(max, '0')));
+    }
+The above pads any numbers in the string to the max length of all numbers in all strings and uses the resulting string to sort.
+
+The cast to (int?) is to allow for collections of strings without any numbers (.Max() on an empty enumerable throws an InvalidOperationException).
+
+shareimprove this answer
+answered Jul 30 '12 at 11:40
+
+Matthew Horsley
+19112
+  	 	
++1 Not only is it the most concise it is the fastest I have seen. except for the accepted answer but I cannot use that one because of machine dependencies. It sorted over 4 million values in about 35 seconds. –  Gene S Oct 4 '12 at 20:58
+  	 	
+This is both beautiful and impossible to read. I assume that the benefits of Linq will mean (at least) best average and best-case performance, so I think I'm going to go with it. Despite the lack of clarity. Thanks very much @Matthew Horsley –  Ian Grainger Jan 16 '14 at 11:29
+add a comment
+up vote
+13
+down vote
+Pure C# solution for linq orderby:
+
+http://zootfroot.blogspot.com/2009/09/natural-sort-compare-with-linq-orderby.html
+
+shareimprove this answer
+answered Mar 12 '10 at 14:52
+
+James McCormack
+5,4032440
+2	 	
+That code is ultimately from codeproject.com/KB/recipes/NaturalComparer.aspx (which is not LINQ-oriented). –  mhenry1384 Aug 31 '10 at 21:19
+1	 	
+The blog post credits Justin Jones (codeproject.com/KB/string/NaturalSortComparer.aspx) for the IComparer, not Pascal Ganaye. –  James McCormack Sep 1 '10 at 9:59
+  	 	
+This solution does the job for me. –  thd Dec 28 '10 at 18:50
+1	 	
+Minor note, this solution ignores spaces which is not the same as what windows does, and is not as good as Matthew Horsley's code below. So you might get 'string01' 'string 01' 'string 02' 'string02' for example (which looks ugly). If you remove the stripping of spaces, it orders the strings backwards i.e. 'string01' comes before 'string 01', which may or may not be acceptable. –  Michael Parker Mar 7 '14 at 17:43
+add a comment
+up vote
+13
+down vote
+None of the existing implementations looked great so I wrote my own. The results are almost identical to the sorting used by modern versions of Windows Explorer (Windows 7/8). The only differences I've seen are 1) although Windows used to (e.g. XP) handle numbers of any length, it's now limited to 19 digits - mine is unlimited, 2) Windows gives inconsistent results with certain sets of Unicode digits - mine works fine (although it doesn't numerically compare digits from surrogate pairs; nor does Windows), and 3) mine can't distinguish different types of non-primary sort weights if they occur in different sections (e.g. "e-1é" vs "é1e-" - the sections before and after the number have diacritic and punctuation weight differences).
+
+public static int CompareNatural(string strA, string strB) {
+    return CompareNatural(strA, strB, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase);
+}
+
+public static int CompareNatural(string strA, string strB, CultureInfo culture, CompareOptions options) {
+    CompareInfo cmp = culture.CompareInfo;
+    int iA = 0;
+    int iB = 0;
+    int softResult = 0;
+    int softResultWeight = 0;
+    while (iA < strA.Length && iB < strB.Length) {
+        bool isDigitA = Char.IsDigit(strA[iA]);
+        bool isDigitB = Char.IsDigit(strB[iB]);
+        if (isDigitA != isDigitB) {
+            return cmp.Compare(strA, iA, strB, iB, options);
+        }
+        else if (!isDigitA && !isDigitB) {
+            int jA = iA + 1;
+            int jB = iB + 1;
+            while (jA < strA.Length && !Char.IsDigit(strA[jA])) jA++;
+            while (jB < strB.Length && !Char.IsDigit(strB[jB])) jB++;
+            int cmpResult = cmp.Compare(strA, iA, jA - iA, strB, iB, jB - iB, options);
+            if (cmpResult != 0) {
+                // Certain strings may be considered different due to "soft" differences that are
+                // ignored if more significant differences follow, e.g. a hyphen only affects the
+                // comparison if no other differences follow
+                string sectionA = strA.Substring(iA, jA - iA);
+                string sectionB = strB.Substring(iB, jB - iB);
+                if (cmp.Compare(sectionA + "1", sectionB + "2", options) ==
+                    cmp.Compare(sectionA + "2", sectionB + "1", options))
+                {
+                    return cmp.Compare(strA, iA, strB, iB, options);
+                }
+                else if (softResultWeight < 1) {
+                    softResult = cmpResult;
+                    softResultWeight = 1;
+                }
+            }
+            iA = jA;
+            iB = jB;
+        }
+        else {
+            char zeroA = (char)(strA[iA] - (int)Char.GetNumericValue(strA[iA]));
+            char zeroB = (char)(strB[iB] - (int)Char.GetNumericValue(strB[iB]));
+            int jA = iA;
+            int jB = iB;
+            while (strA[jA] == zeroA) jA++;
+            while (strB[jB] == zeroB) jB++;
+            int resultIfSameLength = 0;
+            do {
+                isDigitA = jA < strA.Length && Char.IsDigit(strA[jA]);
+                isDigitB = jB < strB.Length && Char.IsDigit(strB[jB]);
+                int numA = isDigitA ? (int)Char.GetNumericValue(strA[jA]) : 0;
+                int numB = isDigitB ? (int)Char.GetNumericValue(strB[jB]) : 0;
+                if (isDigitA && (char)(strA[jA] - numA) != zeroA) isDigitA = false;
+                if (isDigitB && (char)(strB[jB] - numB) != zeroB) isDigitB = false;
+                if (isDigitA && isDigitB) {
+                    if (numA != numB && resultIfSameLength == 0) {
+                        resultIfSameLength = numA < numB ? -1 : 1;
+                    }
+                    jA++;
+                    jB++;
+                }
+            }
+            while (isDigitA && isDigitB);
+            if (isDigitA != isDigitB) {
+                // One number has more digits than the other (ignoring leading zeros) - the longer
+                // number must be larger
+                return isDigitA ? 1 : -1;
+            }
+            else if (resultIfSameLength != 0) {
+                // Both numbers are the same length (ignoring leading zeros) and at least one of
+                // the digits differed - the first difference determines the result
+                return resultIfSameLength;
+            }
+            int lA = jA - iA;
+            int lB = jB - iB;
+            if (lA != lB) {
+                // Both numbers are equivalent but one has more leading zeros
+                return lA > lB ? -1 : 1;
+            }
+            else if (zeroA != zeroB && softResultWeight < 2) {
+                softResult = cmp.Compare(strA, iA, 1, strB, iB, 1, options);
+                softResultWeight = 2;
+            }
+            iA = jA;
+            iB = jB;
+        }
+    }
+    if (iA < strA.Length || iB < strB.Length) {
+        return iA < strA.Length ? 1 : -1;
+    }
+    else if (softResult != 0) {
+        return softResult;
+    }
+    return 0;
+}
+The signature matches the Comparison<string> delegate:
+
+string[] files = Directory.GetFiles(@"C:\");
+Array.Sort(files, CompareNatural);
+Here's a wrapper class for use as IComparer<string>:
+
+public class CustomComparer<T> : IComparer<T> {
+    private Comparison<T> _comparison;
+
+    public CustomComparer(Comparison<T> comparison) {
+        _comparison = comparison;
+    }
+
+    public int Compare(T x, T y) {
+        return _comparison(x, y);
+    }
+}
+Example:
+
+string[] files = Directory.EnumerateFiles(@"C:\")
+    .OrderBy(f => f, new CustomComparer<string>(CompareNatural))
+    .ToArray();
+Here's a good set of filenames I use for testing:
+
+Func<string, string> expand = (s) => { int o; while ((o = s.IndexOf('\\')) != -1) { int p = o + 1;
+    int z = 1; while (s[p] == '0') { z++; p++; } int c = Int32.Parse(s.Substring(p, z));
+    s = s.Substring(0, o) + new string(s[o - 1], c) + s.Substring(p + z); } return s; };
+string encodedFileNames =
+    "KDEqLW4xMiotbjEzKjAwMDFcMDY2KjAwMlwwMTcqMDA5XDAxNyowMlwwMTcqMDlcMDE3KjEhKjEtISox" +
+    "LWEqMS4yNT8xLjI1KjEuNT8xLjUqMSoxXDAxNyoxXDAxOCoxXDAxOSoxXDA2NioxXDA2NyoxYSoyXDAx" +
+    "NyoyXDAxOCo5XDAxNyo5XDAxOCo5XDA2Nio9MSphMDAxdGVzdDAxKmEwMDF0ZXN0aW5nYTBcMzEqYTAw" +
+    "Mj9hMDAyIGE/YTAwMiBhKmEwMDIqYTAwMmE/YTAwMmEqYTAxdGVzdGluZ2EwMDEqYTAxdnNmcyphMSph" +
+    "MWEqYTF6KmEyKmIwMDAzcTYqYjAwM3E0KmIwM3E1KmMtZSpjZCpjZipmIDEqZipnP2cgMT9oLW4qaG8t" +
+    "bipJKmljZS1jcmVhbT9pY2VjcmVhbT9pY2VjcmVhbS0/ajBcNDE/ajAwMWE/ajAxP2shKmsnKmstKmsx" +
+    "KmthKmxpc3QqbTAwMDNhMDA1YSptMDAzYTAwMDVhKm0wMDNhMDA1Km0wMDNhMDA1YSpuMTIqbjEzKm8t" +
+    "bjAxMypvLW4xMipvLW40P28tbjQhP28tbjR6P28tbjlhLWI1Km8tbjlhYjUqb24wMTMqb24xMipvbjQ/" +
+    "b240IT9vbjR6P29uOWEtYjUqb245YWI1Km/CrW4wMTMqb8KtbjEyKnAwMCpwMDEqcDAxwr0hKnAwMcK9" +
+    "KnAwMcK9YSpwMDHCvcK+KnAwMipwMMK9KnEtbjAxMypxLW4xMipxbjAxMypxbjEyKnItMDAhKnItMDAh" +
+    "NSpyLTAwIe+8lSpyLTAwYSpyLe+8kFwxIS01KnIt77yQXDEhLe+8lSpyLe+8kFwxISpyLe+8kFwxITUq" +
+    "ci3vvJBcMSHvvJUqci3vvJBcMWEqci3vvJBcMyE1KnIwMCEqcjAwLTUqcjAwLjUqcjAwNSpyMDBhKnIw" +
+    "NSpyMDYqcjQqcjUqctmg2aYqctmkKnLZpSpy27Dbtipy27Qqctu1KnLfgN+GKnLfhCpy34UqcuClpuCl" +
+    "rCpy4KWqKnLgpasqcuCnpuCnrCpy4KeqKnLgp6sqcuCppuCprCpy4KmqKnLgqasqcuCrpuCrrCpy4Kuq" +
+    "KnLgq6sqcuCtpuCtrCpy4K2qKnLgrasqcuCvpuCvrCpy4K+qKnLgr6sqcuCxpuCxrCpy4LGqKnLgsasq" +
+    "cuCzpuCzrCpy4LOqKnLgs6sqcuC1puC1rCpy4LWqKnLgtasqcuC5kOC5lipy4LmUKnLguZUqcuC7kOC7" +
+    "lipy4LuUKnLgu5UqcuC8oOC8pipy4LykKnLgvKUqcuGBgOGBhipy4YGEKnLhgYUqcuGCkOGClipy4YKU" +
+    "KnLhgpUqcuGfoOGfpipy4Z+kKnLhn6UqcuGgkOGglipy4aCUKnLhoJUqcuGlhuGljCpy4aWKKnLhpYsq" +
+    "cuGnkOGnlipy4aeUKnLhp5UqcuGtkOGtlipy4a2UKnLhrZUqcuGusOGutipy4a60KnLhrrUqcuGxgOGx" +
+    "hipy4bGEKnLhsYUqcuGxkOGxlipy4bGUKnLhsZUqcuqYoFwx6pilKnLqmKDqmKUqcuqYoOqYpipy6pik" +
+    "KnLqmKUqcuqjkOqjlipy6qOUKnLqo5UqcuqkgOqkhipy6qSEKnLqpIUqcuqpkOqplipy6qmUKnLqqZUq" +
+    "cvCQkqAqcvCQkqUqcvCdn5gqcvCdn50qcu+8kFwxISpy77yQXDEt77yVKnLvvJBcMS7vvJUqcu+8kFwx" +
+    "YSpy77yQXDHqmKUqcu+8kFwx77yO77yVKnLvvJBcMe+8lSpy77yQ77yVKnLvvJDvvJYqcu+8lCpy77yV" +
+    "KnNpKnPEsSp0ZXN02aIqdGVzdNmi2aAqdGVzdNmjKnVBZS0qdWFlKnViZS0qdUJlKnVjZS0xw6kqdWNl" +
+    "McOpLSp1Y2Uxw6kqdWPDqS0xZSp1Y8OpMWUtKnVjw6kxZSp3ZWlhMSp3ZWlhMip3ZWlzczEqd2Vpc3My" +
+    "KndlaXoxKndlaXoyKndlacOfMSp3ZWnDnzIqeSBhMyp5IGE0KnknYTMqeSdhNCp5K2EzKnkrYTQqeS1h" +
+    "Myp5LWE0KnlhMyp5YTQqej96IDA1MD96IDIxP3ohMjE/ejIwP3oyMj96YTIxP3rCqTIxP1sxKl8xKsKt" +
+    "bjEyKsKtbjEzKsSwKg==";
+string[] fileNames = Encoding.UTF8.GetString(Convert.FromBase64String(encodedFileNames))
+    .Replace("*", ".txt?").Split(new[] { "?" }, StringSplitOptions.RemoveEmptyEntries)
+    .Select(n => expand(n)).ToArray();
+shareimprove this answer
+edited Feb 28 '13 at 15:01
+
+answered Aug 13 '11 at 1:45
+
+J.D.
+1,196812
+  	 	
+The digit sections need to be compared section-wise, i.e., 'abc12b' should be less than 'abc123'. –  Xichen Li Feb 18 '13 at 22:14 
+  	 	
+@XichenLi The code already does that. –  J.D. Feb 20 '13 at 6:15
+  	 	
+You could try the following data: public string[] filenames = { "-abc12.txt", "abc12.txt", "1abc_2.txt", "a0000012.txt", "a0000012c.txt", "a000012.txt", "a000012b.txt", "a012.txt", "a0000102.txt", "abc1_2.txt", "abc12.txt", "abc12b.txt", "abc123.txt", "abccde.txt", "b0000.txt", "b00001.txt", "b0001.txt", "b001.txt", "c0000.txt", "c0000c.txt", "c00001.txt", "c000b.txt", "d0.20.2b.txt", "d0.1000c.txt", "d0.2000y.txt", "d0.20000.2b.txt", "e0000120000012", "e0000012000012"}; –  Xichen Li Feb 21 '13 at 1:59 
+1	 	
+@XichenLi I've updated my code to work more like Windows 8. –  J.D. Feb 25 '13 at 1:22
+1	 	
+Has bug. Index Out Of Range –  linquize Mar 18 '13 at 6:23
+show 2 more comments
+up vote
+10
+down vote
+You do need to be careful -- I vaguely recall reading that StrCmpLogicalW, or something like it, was not strictly transitive, and I have observed .NET's sort methods to sometimes get stuck in infinite loops if the comparison function breaks that rule.
+
+A transitive comparison will always report that a < c if a < b and b < c. There exists a function that does a natural sort order comparison that does not always meet that criterion, but I can't recall whether it is StrCmpLogicalW or something else.
+
+shareimprove this answer
+answered Sep 1 '09 at 19:24
+
+Jonathan Gilbert
+567411
+  	 	
+Do you have any proof of this statement? After googling around, I can't find any indication that it is true. –  mhenry1384 Aug 31 '10 at 21:03 
+1	 	
+I've experienced those infinite loops with StrCmpLogicalW. –  thd Dec 28 '10 at 18:48
+3	 	
+@mhenry: See connect.microsoft.com/VisualStudio/feedback/details/236900/… and codeproject.com/KB/cs/StringCompareBug.aspx –  Brian Jan 25 '11 at 15:01 
+  	 	
+Visual Studio feedback item 236900 no longer exists, but here's a more up-to-date one that confirms the problem: connect.microsoft.com/VisualStudio/feedback/details/774540/… It also gives a work-around: CultureInfo has a property CompareInfo, and the object it returns can supply you with SortKey objects. These, in turn, can be compared and guarantee transitivity. –  Jonathan Gilbert May 8 at 20:23 
+add a comment
+up vote
+5
+down vote
+My solution:
+
+void Main()
+{
+    new[] {"a4","a3","a2","a10","b5","b4","b400","1","C1d","c1d2"}.OrderBy(x => x, new NaturalStringComparer()).Dump();
+}
+
+public class NaturalStringComparer : IComparer<string>
+{
+    private static readonly Regex _re = new Regex(@"(?<=\D)(?=\d)|(?<=\d)(?=\D)", RegexOptions.Compiled);
+
+    public int Compare(string x, string y)
+    {
+        x = x.ToLower();
+        y = y.ToLower();
+        if(string.Compare(x, 0, y, 0, Math.Min(x.Length, y.Length)) == 0)
+        {
+            if(x.Length == y.Length) return 0;
+            return x.Length < y.Length ? -1 : 1;
+        }
+        var a = _re.Split(x);
+        var b = _re.Split(y);
+        int i = 0;
+        while(true)
+        {
+            int r = PartCompare(a[i], b[i]);
+            if(r != 0) return r;
+            ++i;
+        }
+    }
+
+    private static int PartCompare(string x, string y)
+    {
+        int a, b;
+        if(int.TryParse(x, out a) && int.TryParse(y, out b))
+            return a.CompareTo(b);
+        return x.CompareTo(y);
+    }
+}
+Results:
+
+1
+a2
+a3
+a4
+a10
+b4
+b5
+b400
+C1d
+c1d2
+Edit: Thinking abotut his some more, we can do this better yet. There's really no need to split the string at all. You can just compare it character by character from the start, and then if they differ and the character they differ on is a digit, then convert from that character forward into an integer (perhaps using a regex with \G\d+), and compare the ints.
+
+Only problem I see is if you have strings like a01b and a1b, then the ints will compare the same... I suppose I'd just re-compare them (the integer portion) lexicographically then, and bail out before we even look at the b.
+
+shareimprove this answer
+edited Jul 25 '12 at 5:57
+
+answered Jul 24 '12 at 5:09
+
+Mark
+61.8k86370627
+  	 	
+Nice, works as expected. –  Natxo Oct 17 '12 at 14:12
+add a comment
+up vote
+4
+down vote
+Adding to Greg Beech's answer (because I've just been searching for that), if you want to use this from Linq you can use the OrderBy that takes an IComparer. E.g.:
+
+var items = new List<MyItem>();
+
+// fill items
+
+var sorted = items.OrderBy(item => item.Name, new NaturalStringComparer());
+shareimprove this answer
+answered Sep 23 '09 at 15:36
+
+Wilka
+14.5k53769
+add a comment
+up vote
+4
+down vote
+Matthews Horsleys answer is the fastest method which doesn't change behaviour depending on which version of windows your program is running on. However, it can be even faster by creating the regex once, and using RegexOptions.Compiled. I also added the option of inserting a string comparer so you can ignore case if needed, and improved readability a bit.
+
+    public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer stringComparer = null)
+    {
+        var regex = new Regex(@"\d+", RegexOptions.Compiled);
+
+        int maxDigits = items
+                      .SelectMany(i => regex.Matches(selector(i)).Cast<Match>().Select(digitChunk => (int?)digitChunk.Value.Length))
+                      .Max() ?? 0;
+
+        return items.OrderBy(i => regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
+    }
+Use by
+
+var sortedEmployees = employees.OrderByNatural(emp => emp.Name);
+This takes 450ms to sort 100,000 strings compared to 300ms for the default .net string comparison - pretty fast!
+
+shareimprove this answer
+edited May 26 at 13:51
+
+answered Mar 11 '14 at 10:46
+
+Michael Parker
+795619
+add a comment
+up vote
+2
+down vote
+Fix for the CompareNatural implementation of J.D.:
+
+Ran on "Index out of range" exception too. Changed
+
+while (strA[jA] == zeroA) jA++;
+while (strB[jB] == zeroB) jB++;
+to
+
+while (jA < strA.Length && strA[jA] == zeroA) jA++;
+while (jB < strB.Length && strB[jB] == zeroB) jB++;
+Thanks to J.D.! Helped a lot on WinRT.
+
+Hth,
+
+Stefan
+
+shareimprove this answer
+answered Oct 31 '13 at 15:37
+
+Stefan
+742
+add a comment
+up vote
+0
+down vote
+We had a need for a natural sort to deal with text with the following pattern:
+
+"Test 1-1-1 something"
+"Test 1-2-3 something"
+...
+For some reason when I first looked on SO, I didn't find this post and implemented our own. Compared to some of the solutions presented here, while similar in concept, it could have the benefit of maybe being simpler and easier to understand. However, while I did try to look at performance bottlenecks, It is still a much slower implementation than the default OrderBy().
+
+Here is the extension method I implement:
+
+public static class EnumerableExtensions
+{
+    // set up the regex parser once and for all
+    private static readonly Regex Regex = new Regex(@"\d+|\D+", RegexOptions.Compiled | RegexOptions.Singleline);
+
+    // stateless comparer can be built once
+    private static readonly AggregateComparer Comparer = new AggregateComparer();
+
+    public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> source, Func<T, string> selector)
+    {
+        // first extract string from object using selector
+        // then extract digit and non-digit groups
+        Func<T, IEnumerable<IComparable>> splitter =
+            s => Regex.Matches(selector(s))
+                      .Cast<Match>()
+                      .Select(m => Char.IsDigit(m.Value[0]) ? (IComparable) int.Parse(m.Value) : m.Value);
+        return source.OrderBy(splitter, Comparer);
+    }
+
+    /// <summary>
+    /// This comparer will compare two lists of objects against each other
+    /// </summary>
+    /// <remarks>Objects in each list are compare to their corresponding elements in the other
+    /// list until a difference is found.</remarks>
+    private class AggregateComparer : IComparer<IEnumerable<IComparable>>
+    {
+        public int Compare(IEnumerable<IComparable> x, IEnumerable<IComparable> y)
+        {
+            return
+                x.Zip(y, (a, b) => new {a, b})              // walk both lists
+                 .Select(pair => pair.a.CompareTo(pair.b))  // compare each object
+                 .FirstOrDefault(result => result != 0);    // until a difference is found
+        }
+    }
+}
+The idea is to split the original strings into blocks of digits and non-digits ("\d+|\D+"). Since this is a potentially expensive task, it is done only once per entry. We then use a comparer of comparable objects (sorry, I can't find a more proper way to say it). It compares each block to its corresponding block in the other string.
+
+I would like feedback on how this could be improved and what the major flaws are. Note that maintainability is important to us at this point and we are not currently using this in extremely large data sets.
+
+shareimprove this answer
+answered Mar 21 '13 at 23:52
+
+Eric Liprandi
+1,2281325
+1	 	
+This crashes when it tries to compare strings that are structurally different - eg comparing "a-1" to "a-2" works fine, but comparing "a" to "1" is not, because "a".CompareTo(1) throws an exception. –  jimrandomh Oct 29 '13 at 18:22
+  	 	
+@jimrandomh, you are correct. This approach was specific to our patterns. –  Eric Liprandi Nov 8 '13 at 16:25
+add a comment
+up vote
+0
+down vote
+Expanding on a couple of the previous answers and making use of extension methods, I came up with the following that doesn't have the caveats of potential multiple enumerable enumeration, or performance issues concerned with using multiple regex objects, or calling regex needlessly, that being said, it does use ToList(), which can negate the benefits in larger collections.
+
+The selector supports generic typing to allow any delegate to be assigned, the elements in the source collection are mutated by the selector, then converted to strings with ToString().
+
+    private static readonly Regex _NaturalOrderExpr = new Regex(@"\d+", RegexOptions.Compiled);
+
+    public static IEnumerable<TSource> OrderByNatural<TSource, TKey>(
+        this IEnumerable<TSource> source, Func<TSource, TKey> selector)
+    {
+        int max = 0;
+
+        var selection = source.Select(
+            o =>
+            {
+                var v = selector(o);
+                var s = v != null ? v.ToString() : String.Empty;
+
+                if (!String.IsNullOrWhiteSpace(s))
+                {
+                    var mc = _NaturalOrderExpr.Matches(s);
+
+                    if (mc.Count > 0)
+                    {
+                        max = Math.Max(max, mc.Cast<Match>().Max(m => m.Value.Length));
+                    }
+                }
+
+                return new
+                {
+                    Key = o,
+                    Value = s
+                };
+            }).ToList();
+
+        return
+            selection.OrderBy(
+                o =>
+                String.IsNullOrWhiteSpace(o.Value) ? o.Value : _NaturalOrderExpr.Replace(o.Value, m => m.Value.PadLeft(max, '0')))
+                     .Select(o => o.Key);
+    }
+
+    public static IEnumerable<TSource> OrderByDescendingNatural<TSource, TKey>(
+        this IEnumerable<TSource> source, Func<TSource, TKey> selector)
+    {
+        int max = 0;
+
+        var selection = source.Select(
+            o =>
+            {
+                var v = selector(o);
+                var s = v != null ? v.ToString() : String.Empty;
+
+                if (!String.IsNullOrWhiteSpace(s))
+                {
+                    var mc = _NaturalOrderExpr.Matches(s);
+
+                    if (mc.Count > 0)
+                    {
+                        max = Math.Max(max, mc.Cast<Match>().Max(m => m.Value.Length));
+                    }
+                }
+
+                return new
+                {
+                    Key = o,
+                    Value = s
+                };
+            }).ToList();
+
+        return
+            selection.OrderByDescending(
+                o =>
+                String.IsNullOrWhiteSpace(o.Value) ? o.Value : _NaturalOrderExpr.Replace(o.Value, m => m.Value.PadLeft(max, '0')))
+                     .Select(o => o.Key);
+    }
+shareimprove this answer
+edited Sep 23 '14 at 22:52
+
+answered Sep 23 '14 at 20:25
+
+Vorspire
